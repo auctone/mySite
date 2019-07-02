@@ -9,71 +9,38 @@
       sm8
       md6
     >
-      <div class="text-xs-center">
-        <logo />
-        <vuetify-logo />
-      </div>
       <v-card>
         <v-card-title class="headline">
-          Welcome to the Vuetify + Nuxt.js template
-        </v-card-title>
-        <v-card-text>
-          <p>Vuetify is a progressive Material Design component framework for Vue.js. It was designed to empower developers to create amazing applications.</p>
-          <p>
-            For more information on Vuetify, check out the <a
-              href="https://vuetifyjs.com"
-              target="_blank"
-            >
-              documentation
-            </a>.
-          </p>
-          <p>
-            If you have questions, please join the official <a
-              href="https://chat.vuetifyjs.com/"
-              target="_blank"
-              title="chat"
-            >
-              discord
-            </a>.
-          </p>
-          <p>
-            Find a bug? Report it on the github <a
-              href="https://github.com/vuetifyjs/vuetify/issues"
-              target="_blank"
-              title="contribute"
-            >
-              issue board
-            </a>.
-          </p>
-          <p>Thank you for developing with Vuetify and I look forward to bringing more exciting features in the future.</p>
-          <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
-          </div>
-          <hr class="my-3">
-          <a
-            href="https://nuxtjs.org/"
-            target="_blank"
-          >
-            Nuxt Documentation
-          </a>
-          <br>
-          <a
-            href="https://github.com/nuxt/nuxt.js"
-            target="_blank"
-          >
-            Nuxt GitHub
-          </a>
-        </v-card-text>
+          Mikes
+        </v-card-title >
+			  <v-img
+				  v-for="index in totalCards"
+				  :key="index" class="cards"
+				  height="150px"
+				  width="110px"
+				  :data-index="index"
+				  :id="'random-card' + index"
+				  :src="deal.data.cards[index -1].image">
+			  </v-img>
+		  		<v-text-field
+					type="number"
+					label="How many cards to show"
+					mask="#"
+					@input="up"
+				>
+
+				</v-text-field>
+		  {{deal}}
         <v-card-actions>
           <v-spacer />
           <v-btn
-            color="primary"
-            flat
-            nuxt
-            to="/inspire"
-          >
-            Continue
+           @click="newCard()"
+          >New Card
           </v-btn>
+			<v-btn
+				@click="shuffleAgain()"
+			>Shuffle
+			</v-btn>
         </v-card-actions>
       </v-card>
     </v-flex>
@@ -82,12 +49,53 @@
 
 <script>
 import Logo from '~/components/Logo.vue'
-import VuetifyLogo from '~/components/VuetifyLogo.vue'
+import axios from 'axios'
 
 export default {
+	async asyncData ({ params }) {
+
+
+		let shuffle = await axios.get('https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1');
+		let deal = await axios.get('https://deckofcardsapi.com/api/deck/oc4eusqclle8/draw/?count=7');
+		let reShuffle = await axios.get('https://deckofcardsapi.com/api/deck/oc4eusqclle8/shuffle/');
+		let newDeck = await axios.get('https://deckofcardsapi.com/api/deck/new/');
+		//let piles = await axios.get('https://deckofcardsapi.com/api/deck/oc4eusqclle8/pile/mike/add/?cards=AS,2S');
+		//let listPiles = await axios.get('https://deckofcardsapi.com/api/deck/oc4eusqclle8/pile/mike/list');
+		//let drawFromPiles = await axios.get('https://deckofcardsapi.com/api/deck/oc4eusqclle8/pile/main/list');
+		return { shuffle, deal, reShuffle, newDeck}
+	},
   components: {
-    Logo,
-    VuetifyLogo
+    Logo
+  },
+	data() {
+		return {
+			loading: false,
+			rows: [],
+			totalCards: 7
+		}
+	},
+	methods: {
+		newCard() {
+			axios.get(`https://deckofcardsapi.com/api/deck/oc4eusqclle8/draw/?count=${this.totalCards}`).then(data=>{
+				this.deal = data;
+			})
+
+		},
+		shuffleAgain(){
+			axios.get('https://deckofcardsapi.com/api/deck/oc4eusqclle8/shuffle/').then(data=>{
+				this.reShuffle = data;
+			})
+		},
+		up (){
+
+		},
   }
 }
 </script>
+<style >
+.cards {
+
+	position: relative;
+}
+
+</style>
